@@ -25,11 +25,16 @@ function optimizeGurobi(QM; method=2, presolve=true, scaling=true, crossover=tru
     # -1=automatic, 0=primal simplex, 1=dual simplex, 2=barrier,
     # 3=concurrent, 4=deterministic concurrent, 5=deterministic concurrent simplex.
     # default to barrier
-    setparam!(env, "Method", 2)
-    setparam!(env, "Presolve", 0) # set presolve to 0
-    setparam!(env, "ScaleFlag", 0) # no scaling
-    setparam!(env, "Crossover", 0)
-    setparam!(env, "BarIterLimit", 0)
+    setparam!(env, "Method", method)
+    if !presolve
+        setparam!(env, "Presolve", 0) # set presolve to 0
+    end
+    if !scaling
+        setparam!(env, "ScaleFlag", 0) # no scaling
+    end
+    if !crossover
+        setparam!(env, "Crossover", 0)
+    end
 
     Aeq = jac(SM, SM.meta.x0)
     beq = SM.meta.lcon
@@ -43,7 +48,6 @@ function optimizeGurobi(QM; method=2, presolve=true, scaling=true, crossover=tru
      # run optimization
     optimize(model)
 
-    # y with dual: b'*y   s.t. A'*y <= c and y >= 0
     y = zeros(n)
     for i=1:n
         y[i] = Gurobi.get_dblattrelement(model, "Pi", i)
@@ -54,7 +58,6 @@ function optimizeGurobi(QM; method=2, presolve=true, scaling=true, crossover=tru
         s[i] = Gurobi.get_dblattrelement(model, "RC", i)
     end
 
-    # outputs
     optim_info = get_optiminfo(model)
     if optim_info.status == :optimal
         status = :acceptable

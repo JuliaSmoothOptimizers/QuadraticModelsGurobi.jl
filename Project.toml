@@ -3,6 +3,14 @@ uuid = "b0275aa7-013b-42ad-9e10-dc5d6db0accb"
 authors = ["Geoffroy Leconte <gleconte50@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+NLPModels = "a4795742-8479-5a88-8948-cc11e1c8c1a6"
+QuadraticModels = "f468eda6-eac5-11e8-05a5-ff9e497bcd19"
+SolverTools = "b5612192-2639-5dc1-abfe-fbedd65fab29"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
 [compat]
 julia = "1"
 

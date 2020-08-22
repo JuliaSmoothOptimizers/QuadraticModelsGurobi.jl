@@ -12,6 +12,7 @@ SolverTools = "b5612192-2639-5dc1-abfe-fbedd65fab29"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
+SolverTools = "0.3"
 julia = "1"
 
 [extras]

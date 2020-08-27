@@ -4,6 +4,7 @@ export gurobi
 
 using Gurobi
 using QuadraticModels
+using QPSReader
 using NLPModels
 using SolverTools
 using LinearAlgebra

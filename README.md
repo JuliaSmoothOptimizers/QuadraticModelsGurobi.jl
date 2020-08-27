@@ -6,8 +6,7 @@ format (see QPSReader.jl)
 # Usage
 
 ```julia
-using QPSReader
-using QPModelGurobi
-qpmodel = readqps("AFIRO.SIF")
-stats = QPModelGurobi.optimizeGurobi(qpmodel)
+using QPSReader, QPModelGurobi
+qps = readqps("AFIRO.SIF")
+stats = gurobi(qps)
 ```

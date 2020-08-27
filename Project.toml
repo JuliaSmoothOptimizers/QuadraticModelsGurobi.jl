@@ -1,4 +1,4 @@
-name = "QPModelGurobi"
+name = "QuadraticModelsGurobi"
 uuid = "b0275aa7-013b-42ad-9e10-dc5d6db0accb"
 authors = ["Geoffroy Leconte <gleconte50@gmail.com> and contributors"]
 version = "0.1.0"

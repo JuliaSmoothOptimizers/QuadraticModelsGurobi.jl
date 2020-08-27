@@ -1,4 +1,4 @@
-module QPModelGurobi
+module QuadraticModelsGurobi
 
 export gurobi
 

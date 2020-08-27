@@ -1,6 +1,6 @@
-using QPModelGurobi
+using QuadraticModelsGurobi
 using Test
 
-@testset "QPModelGurobi.jl" begin
+@testset "QuadraticModelsGurobi.jl" begin
     # Write your tests here.
 end

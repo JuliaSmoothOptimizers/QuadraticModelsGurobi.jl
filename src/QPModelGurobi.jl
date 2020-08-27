@@ -43,14 +43,13 @@ function gurobi(QM; method=2, kwargs...)
     setparam!(env, "Method", method)
     kwargs = Dict(kwargs)
     for (k, v) in kwargs
-    if k==:presolve
-        setparam!(env, "Presolve", v) # 0 = no presolve
-    end
-    if k==:scaling
-        setparam!(env, "ScaleFlag", v) # 0 = no scaling
-    end
-    if k==:crossover
-        setparam!(env, "Crossover", v) # 0 = no crossover
+        if k==:presolve
+            setparam!(env, "Presolve", v) # 0 = no presolve
+        elseif k==:scaling
+            setparam!(env, "ScaleFlag", v) # 0 = no scaling
+        elseif k==:crossover
+            setparam!(env, "Crossover", v) # 0 = no crossover
+        end
     end
 
     T = eltype(QM.data.Avals)

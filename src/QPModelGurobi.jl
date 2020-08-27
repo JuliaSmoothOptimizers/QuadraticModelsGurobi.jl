@@ -9,8 +9,8 @@ using SolverTools
 using LinearAlgebra
 using SparseArrays
 
-const gurobi_statuses = Dict(:loaded ,
-                            :optimal => :acceptable,
+const gurobi_statuses = Dict(:loaded => :unknown,
+                             :optimal => :acceptable,
                             :infeasible => :infeasible,
                             :inf_or_unbd => :infeasible,
                             :unbounded => :unbounded,

@@ -123,8 +123,7 @@ function gurobi(QM; method=2, kwargs...)
 end
 
 
-function gurobi(qpdata::QPSData; method=2, kwarg...)
+function gurobi(qpdata::QPSData; method=2, kwargs...)
     return gurobi(createQuadraticModel(qpdata); method=2, kwargs...)
 end
-
 end

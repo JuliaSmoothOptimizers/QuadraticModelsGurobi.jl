@@ -6,7 +6,6 @@ version = "0.1.0"
 [deps]
 Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-NLPModels = "a4795742-8479-5a88-8948-cc11e1c8c1a6"
 QPSReader = "10f199a5-22af-520b-b891-7ce84a7b1bd0"
 QuadraticModels = "f468eda6-eac5-11e8-05a5-ff9e497bcd19"
 SolverTools = "b5612192-2639-5dc1-abfe-fbedd65fab29"

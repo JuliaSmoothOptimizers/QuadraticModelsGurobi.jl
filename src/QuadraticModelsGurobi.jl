@@ -90,7 +90,7 @@ function gurobi(QM; method=2, kwargs...)
     Aeq = sparse(Aeqrows, Aeqcols, Aeqvals, length(beq), QM.meta.nvar)
     A = sparse(Arows, Acols, Avals, length(b), QM.meta.nvar)
     H = sparse(QM.data.Hrows, QM.data.Hcols, QM.data.Hvals)
-    H = sparse(Symmetric(H, :L))
+    H = Matrix(Symmetric(H, :L))
 
     model = gurobi_model(env; f = QM.data.c, H = H,
                         A = A, b = b, Aeq = Aeq, beq = beq,

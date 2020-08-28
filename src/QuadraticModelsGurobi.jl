@@ -114,8 +114,8 @@ function gurobi(QM; method=2, kwargs...)
                                   iter = Gurobi.get_intattr(model,"BarIterCount"),
                                   primal_feas = Gurobi.get_dblattr(model, "ConstrResidual"),
                                   dual_feas = Gurobi.get_dblattr(model, "DualResidual"),
-                                  solver_specific = Dict(:reduced_costs => s),
-                                  multipliers = y,
+                                  solver_specific = Dict(:multipliers => y,
+                                                         :reduced_costs => s),
                                   elapsed_time = optim_info.runtime)
     return stats
 end

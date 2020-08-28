@@ -41,7 +41,6 @@ function gurobi(QM; method=2, kwargs...)
     # 3=concurrent, 4=deterministic concurrent, 5=deterministic concurrent simplex.
     # default to barrier
     setparam!(env, "Method", method)
-    kwargs = Dict(kwargs)
     # use kwargs change presolve, scaling and crossover mode
     # ex: kwargs = (:presolve, 0)  (see gurobi doc for other options)
     for (k, v) in kwargs

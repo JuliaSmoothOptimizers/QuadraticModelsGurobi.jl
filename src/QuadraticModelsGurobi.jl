@@ -63,7 +63,7 @@ function gurobi(QM; method=2, kwargs...)
     p = sortperm(QM.data.Arows)
 
     for i=1:length(QM.meta.lcon)
-        if @views QM.data.Arows[p][last_irow+1] == i
+        if last_irow < length(QM.data.Arows) && @views QM.data.Arows[p][last_irow+1] == i
             first_irow = last_irow + 1
             last_irow = @views first_irow-1+findlast(QM.data.Arows[p][first_irow:end] .== i)
             if QM.meta.lcon[i] == QM.meta.ucon[i]

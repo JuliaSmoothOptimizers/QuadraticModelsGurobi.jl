@@ -84,7 +84,6 @@ function gurobi(QM; method=2, kwargs...)
                 append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
                 append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
                 append!(Avals, @views .-QM.data.Avals[p][first_irow:last_irow])
-            end
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
                 c_ineq += 1
                 push!(b, QM.meta.ucon[i])

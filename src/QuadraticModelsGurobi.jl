@@ -85,7 +85,6 @@ function gurobi(QM; method=2, kwargs...)
                 append!(Avals, @views .-QM.data.Avals[p][first_irow:last_irow])
             end
         end
-
     end
     Aeq = sparse(Aeqrows, Aeqcols, Aeqvals, length(beq), QM.meta.nvar)
     A = sparse(Arows, Acols, Avals, length(b), QM.meta.nvar)
@@ -98,8 +97,8 @@ function gurobi(QM; method=2, kwargs...)
      # run optimization
     optimize(model)
 
-    y = zeros(length(beq))
-    for i=1:length(beq)
+    y = zeros(length(beq)+length(b))
+    for i=1:(length(beq)+length(b))
         y[i] = Gurobi.get_dblattrelement(model, "Pi", i)
     end
     s = zeros(length(QM.data.c)) # s_l - s_u
@@ -115,8 +114,8 @@ function gurobi(QM; method=2, kwargs...)
                                   iter = Gurobi.get_intattr(model,"BarIterCount"),
                                   primal_feas = Gurobi.get_dblattr(model, "ConstrResidual"),
                                   dual_feas = Gurobi.get_dblattr(model, "DualResidual"),
-                                  solver_specific = Dict(:multipliers => y,
-                                                         :RC => s),
+                                  solver_specific = Dict(:reduced_costs => s),
+                                  multipliers = y,
                                   elapsed_time = optim_info.runtime)
     return stats
 end
@@ -125,4 +124,5 @@ end
 function gurobi(qpdata::QPSData; method=2, kwargs...)
     return gurobi(createQuadraticModel(qpdata); method=2, kwargs...)
 end
+
 end

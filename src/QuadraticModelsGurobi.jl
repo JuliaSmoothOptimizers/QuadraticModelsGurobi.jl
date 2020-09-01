@@ -56,8 +56,17 @@ function gurobi(QM; method=2, kwargs...)
     model = Gurobi.Model(env, "")
     add_cvars!(model, QM.data.c, QM.meta.lvar, QM.meta.uvar)
     update_model!(model)
+
     if QM.meta.nnzh > 0
-	  add_qpterms!(model, QM.data.Hrows, QM.data.Hcols, QM.data.Hvals/2)
+		Hvals = zeros(eltype(QM.meta.Hvals), length(QM.meta.Hvals))
+		for i=1:length(QM.meta.Hvals)
+			if QM.meta.Hrows[i] == QM.meta.Hcols[i]
+				Hvals[i] = QM.meta.Hvals[i] / 2
+			else
+				Hvals[i] = QM.meta.Hvals[i]
+			end
+		end
+	  add_qpterms!(model, QM.data.Hrows, QM.data.Hcols, Hvals)
 	end
 
     T = eltype(QM.data.Avals)

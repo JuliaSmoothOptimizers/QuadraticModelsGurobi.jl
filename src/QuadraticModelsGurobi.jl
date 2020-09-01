@@ -114,7 +114,7 @@ function gurobi(QM; method=2, kwargs...)
     A = @views vcat(.-A_init[QM.meta.jlow,:], A_init[QM.meta.jupp,:],
 			 .-A_init[QM.meta.jrng,:], A_init[QM.meta.jrng,:])
     b = @views vcat(.-QM.meta.lcon[QM.meta.jlow], QM.meta.ucon[QM.meta.jupp],
-			 -.QM.meta.lcon[QM.meta.jrng], QM.meta.ucon[QM.meta.jrng])
+			 .-QM.meta.lcon[QM.meta.jrng], QM.meta.ucon[QM.meta.jrng])
 	if !isempty(A) && !isempty(b)
 		add_constrs!(model, A, '<', b)
 	end

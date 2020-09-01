@@ -126,8 +126,9 @@ function gurobi(QM; method=2, kwargs...)
 
     optimize(model)
 
-    y = zeros(length(beq)+length(b))
-    for i=1:(length(beq)+length(b))
+	n_constr = Gurobi.get_intattr(model, "NumConstrs")
+    y = zeros(n_constr)
+    for i=1:(n_constr)
         y[i] = Gurobi.get_dblattrelement(model, "Pi", i)
     end
     s = zeros(length(QM.data.c)) # s_l - s_u

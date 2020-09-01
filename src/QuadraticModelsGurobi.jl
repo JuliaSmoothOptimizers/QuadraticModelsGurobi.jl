@@ -55,6 +55,7 @@ function gurobi(QM; method=2, kwargs...)
 
     model = Gurobi.Model(env, "")
     add_cvars!(model, QM.data.c, QM.meta.lvar, QM.meta.uvar)
+	Gurobi.set_dblattr!(model, "ObjCon", QM.data.c0)
     update_model!(model)
 
     if QM.meta.nnzh > 0

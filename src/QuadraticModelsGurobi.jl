@@ -78,6 +78,7 @@ function gurobi(QM; method=2, kwargs...)
     c_ineq = 0
     last_irow = 0
     p = sortperm(QM.data.Arows)
+	spvec = spzeros(QM.meta.nvar)
 
     for i=1:length(QM.meta.lcon)
         if last_irow < length(QM.data.Arows) && @views QM.data.Arows[p][last_irow+1] == i
@@ -85,44 +86,64 @@ function gurobi(QM; method=2, kwargs...)
             last_irow = @views first_irow-1+findlast(QM.data.Arows[p][first_irow:end] .== i)
             if QM.meta.lcon[i] == QM.meta.ucon[i]
                 c_eq += 1
-                push!(beq, QM.meta.lcon[i])
-                append!(Aeqcols, QM.data.Acols[p][first_irow:last_irow])
-                append!(Aeqrows, c_eq.*ones(Int, last_irow-first_irow+1))
-                append!(Aeqvals, QM.data.Avals[p][first_irow:last_irow])
+                # push!(beq, QM.meta.lcon[i])
+                # append!(Aeqcols, QM.data.Acols[p][first_irow:last_irow])
+                # append!(Aeqrows, c_eq.*ones(Int, last_irow-first_irow+1))
+                # append!(Aeqvals, QM.data.Avals[p][first_irow:last_irow])
+				spvec = sparsevec(QM.data.Acols[p][first_irow:last_irow],
+								  QM.data.Avals[p][first_irow:last_irow],
+								  QM.meta.nvar)
+				add_constr!(model, spvec, '=', QM.meta.lcon[i])
             elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
                 c_ineq += 1
-                push!(b, QM.meta.ucon[i])
-                append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
-                append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
-                append!(Avals, @views QM.data.Avals[p][first_irow:last_irow])
+                # push!(b, QM.meta.ucon[i])
+                # append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
+                # append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
+                # append!(Avals, @views QM.data.Avals[p][first_irow:last_irow])
+				spvec = sparsevec(QM.data.Acols[p][first_irow:last_irow],
+								  QM.data.Avals[p][first_irow:last_irow],
+								  QM.meta.nvar)
+				add_constr!(model, spvec, '<', QM.meta.ucon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf
                 c_ineq += 1
-                push!(b, -QM.meta.lcon[i])
-                append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
-                append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
-                append!(Avals, @views .-QM.data.Avals[p][first_irow:last_irow])
+                # push!(b, -QM.meta.lcon[i])
+                # append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
+                # append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
+                # append!(Avals, @views .-QM.data.Avals[p][first_irow:last_irow])
+				spvec = sparsevec(QM.data.Acols[p][first_irow:last_irow],
+								  .-QM.data.Avals[p][first_irow:last_irow],
+								  QM.meta.nvar)
+			  	add_constr!(model, spvec, '<', -QM.meta.lcon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
                 c_ineq += 1
-                push!(b, QM.meta.ucon[i])
-                append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
-                append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
-                append!(Avals, @views QM.data.Avals[p][first_irow:last_irow])
+                # push!(b, QM.meta.ucon[i])
+                # append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
+                # append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
+                # append!(Avals, @views QM.data.Avals[p][first_irow:last_irow])
+				spvec = sparsevec(QM.data.Acols[p][first_irow:last_irow],
+								  QM.data.Avals[p][first_irow:last_irow],
+								  QM.meta.nvar)
+				add_constr!(model, spvec, '<', QM.meta.ucon[i])
                 c_ineq += 1
-                push!(b, -QM.meta.lcon[i])
-                append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
-                append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
-                append!(Avals, @views .-QM.data.Avals[p][first_irow:last_irow])
+                # push!(b, -QM.meta.lcon[i])
+                # append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
+                # append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
+                # append!(Avals, @views .-QM.data.Avals[p][first_irow:last_irow])
+				spvec = sparsevec(QM.data.Acols[p][first_irow:last_irow],
+								  .-QM.data.Avals[p][first_irow:last_irow],
+								  QM.meta.nvar)
+				add_constr!(model, spvec, '<', -QM.meta.lcon[i])
             end
         end
     end
-    Aeq = sparse(Aeqrows, Aeqcols, Aeqvals, length(beq), QM.meta.nvar)
-    A = sparse(Arows, Acols, Avals, length(b), QM.meta.nvar)
-	if !isempty(A) && !isempty(b)
-		add_constrs!(model, A, '<', b)
-	end
-	if !isempty(Aeq) && !isempty(beq)
-		add_constrs!(model, Aeq, '=', beq)
-	end
+    # Aeq = sparse(Aeqrows, Aeqcols, Aeqvals, length(beq), QM.meta.nvar)
+    # A = sparse(Arows, Acols, Avals, length(b), QM.meta.nvar)
+	# if !isempty(A) && !isempty(b)
+	# 	add_constrs!(model, A, '<', b)
+	# end
+	# if !isempty(Aeq) && !isempty(beq)
+	# 	add_constrs!(model, Aeq, '=', beq)
+	# end
 	update_model!(model)
 
     optimize(model)

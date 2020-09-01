@@ -70,80 +70,58 @@ function gurobi(QM; method=2, kwargs...)
 	  add_qpterms!(model, QM.data.Hrows, QM.data.Hcols, Hvals)
 	end
 
-    T = eltype(QM.data.Avals)
-    beq, Aeqrows, Aeqcols, Aeqvals = zeros(T,0), zeros(Int, 0), zeros(Int, 0), zeros(T, 0)
-    b, Arows, Acols, Avals = zeros(T,0) ,zeros(Int, 0), zeros(Int, 0), zeros(T, 0)
+	# method 1
     first_irow = 1
-    c_eq = 0
-    c_ineq = 0
     last_irow = 0
     p = sortperm(QM.data.Arows)
 	A_constr = zeros(QM.meta.nvar)
-
     for i=1:length(QM.meta.lcon)
         if last_irow < length(QM.data.Arows) && @views QM.data.Arows[p][last_irow+1] == i
             first_irow = last_irow + 1
             last_irow = @views first_irow-1+findlast(QM.data.Arows[p][first_irow:end] .== i)
             if QM.meta.lcon[i] == QM.meta.ucon[i]
-                c_eq += 1
-                # push!(beq, QM.meta.lcon[i])
-                # append!(Aeqcols, QM.data.Acols[p][first_irow:last_irow])
-                # append!(Aeqrows, c_eq.*ones(Int, last_irow-first_irow+1))
-                # append!(Aeqvals, QM.data.Avals[p][first_irow:last_irow])
 				A_constr = zeros(QM.meta.nvar)
 				A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-						QM.data.Avals[p][first_irow:last_irow]
+						@views QM.data.Avals[p][first_irow:last_irow]
 				add_constr!(model, A_constr, '=', QM.meta.lcon[i])
             elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
-                c_ineq += 1
-                # push!(b, QM.meta.ucon[i])
-                # append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
-                # append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
-                # append!(Avals, @views QM.data.Avals[p][first_irow:last_irow])
 				A_constr = zeros(QM.meta.nvar)
 				A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-						QM.data.Avals[p][first_irow:last_irow]
+						@views QM.data.Avals[p][first_irow:last_irow]
 				add_constr!(model, A_constr, '<', QM.meta.ucon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf
-                c_ineq += 1
-                # push!(b, -QM.meta.lcon[i])
-                # append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
-                # append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
-                # append!(Avals, @views .-QM.data.Avals[p][first_irow:last_irow])
 				A_constr = zeros(QM.meta.nvar)
 				A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-						.-QM.data.Avals[p][first_irow:last_irow]
+						@views .-QM.data.Avals[p][first_irow:last_irow]
 			  	add_constr!(model, A_constr, '<', -QM.meta.lcon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
-                c_ineq += 1
-                # push!(b, QM.meta.ucon[i])
-                # append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
-                # append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
-                # append!(Avals, @views QM.data.Avals[p][first_irow:last_irow])
 				A_constr = zeros(QM.meta.nvar)
 				A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-						QM.data.Avals[p][first_irow:last_irow]
+						@views QM.data.Avals[p][first_irow:last_irow]
 				add_constr!(model, A_constr, '<', QM.meta.ucon[i])
-                c_ineq += 1
-                # push!(b, -QM.meta.lcon[i])
-                # append!(Acols, @views QM.data.Acols[p][first_irow:last_irow])
-                # append!(Arows, @views c_ineq.*ones(Int, last_irow-first_irow+1))
-                # append!(Avals, @views .-QM.data.Avals[p][first_irow:last_irow])
 				A_constr = zeros(QM.meta.nvar)
 				A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-						.-QM.data.Avals[p][first_irow:last_irow]
+						@views .-QM.data.Avals[p][first_irow:last_irow]
 			  	add_constr!(model, A_constr, '<', -QM.meta.lcon[i])
             end
         end
     end
-    # Aeq = sparse(Aeqrows, Aeqcols, Aeqvals, length(beq), QM.meta.nvar)
-    # A = sparse(Arows, Acols, Avals, length(b), QM.meta.nvar)
+
+	# method 2
+	# A_init = sparse(QM.data.Arows, QM.data.Acols, QM.data.Avals)
+    # Aeq = A_init[QM.meta.jfix,:]
+	# beq = QM.meta.lcon[QM.meta.jfix]
+    # A = @views vcat(-1 .* A_init[QM.meta.jlow,:], A_init[QM.meta.jupp,:],
+	# 		 .-A_init[QM.meta.jrng,:], A_init[QM.meta.jrng,:])
+    # b = @views vcat(-1 .* QM.meta.lcon[QM.meta.jlow], QM.meta.ucon[QM.meta.jupp],
+	# 		 -.QM.meta.lcon[QM.meta.jrng], QM.meta.ucon[QM.meta.jrng])
 	# if !isempty(A) && !isempty(b)
 	# 	add_constrs!(model, A, '<', b)
 	# end
 	# if !isempty(Aeq) && !isempty(beq)
 	# 	add_constrs!(model, Aeq, '=', beq)
 	# end
+
 	update_model!(model)
 
     optimize(model)

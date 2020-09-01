@@ -84,7 +84,7 @@ function gurobi(QM; method=2, kwargs...)
 				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
 				# 		@views QM.data.Avals[p][first_irow:last_irow]
 				# add_constr!(model, A_constr, '=', QM.meta.lcon[i])
-				@views add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
 				 				   QM.data.Avals[p][first_irow:last_irow],
 								   '=', QM.meta.lcon[i])
             elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
@@ -92,7 +92,7 @@ function gurobi(QM; method=2, kwargs...)
 				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
 				# 		@views QM.data.Avals[p][first_irow:last_irow]
 				# add_constr!(model, A_constr, '<', QM.meta.ucon[i])
-				@views add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				dd_constr!(model, QM.data.Acols[p][first_irow:last_irow],
 								   QM.data.Avals[p][first_irow:last_irow],
 								   '<', QM.meta.lcon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf
@@ -100,7 +100,7 @@ function gurobi(QM; method=2, kwargs...)
 				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
 				# 		@views .-QM.data.Avals[p][first_irow:last_irow]
 			  	# add_constr!(model, A_constr, '<', -QM.meta.lcon[i])
-				@views add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
 								   .-QM.data.Avals[p][first_irow:last_irow],
 								   '<', -QM.meta.lcon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
@@ -108,14 +108,14 @@ function gurobi(QM; method=2, kwargs...)
 				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
 				# 		@views QM.data.Avals[p][first_irow:last_irow]
 				# add_constr!(model, A_constr, '<', QM.meta.ucon[i])
-				@views add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
 								   QM.data.Avals[p][first_irow:last_irow],
 								   '<', QM.meta.lcon[i])
 				# A_constr = zeros(QM.meta.nvar)
 				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
 				# 		@views .-QM.data.Avals[p][first_irow:last_irow]
 			  	# add_constr!(model, A_constr, '<', -QM.meta.lcon[i])
-				@views add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
 								   .-QM.data.Avals[p][first_irow:last_irow],
 								   '<', -QM.meta.lcon[i])
             end

@@ -58,12 +58,12 @@ function gurobi(QM; method=2, kwargs...)
     update_model!(model)
 
     if QM.meta.nnzh > 0
-		Hvals = zeros(eltype(QM.meta.Hvals), length(QM.meta.Hvals))
-		for i=1:length(QM.meta.Hvals)
-			if QM.meta.Hrows[i] == QM.meta.Hcols[i]
-				Hvals[i] = QM.meta.Hvals[i] / 2
+		Hvals = zeros(eltype(QM.data.Hvals), length(QM.data.Hvals))
+		for i=1:length(QM.data.Hvals)
+			if QM.data.Hrows[i] == QM.data.Hcols[i]
+				Hvals[i] = QM.data.Hvals[i] / 2
 			else
-				Hvals[i] = QM.meta.Hvals[i]
+				Hvals[i] = QM.data.Hvals[i]
 			end
 		end
 	  add_qpterms!(model, QM.data.Hrows, QM.data.Hcols, Hvals)

@@ -53,7 +53,7 @@ function gurobi(QM; method=2, kwargs...)
         end
     end
 
-    model = Model(env, "")
+    model = Gurobi.Model(env, "")
     add_cvars!(model, QM.data.c, QM.meta.lvar, QM.meta.uvar)
     update_model!(model)
     if qp.meta.nnzh > 0

@@ -74,50 +74,29 @@ function gurobi(QM; method=2, kwargs...)
     first_irow = 1
     last_irow = 0
     p = sortperm(QM.data.Arows)
-	#A_constr = zeros(QM.meta.nvar)
     for i=1:length(QM.meta.lcon)
         if last_irow < length(QM.data.Arows) && @views QM.data.Arows[p][last_irow+1] == i
             first_irow = last_irow + 1
             last_irow = @views first_irow-1+findlast(QM.data.Arows[p][first_irow:end] .== i)
             if QM.meta.lcon[i] == QM.meta.ucon[i]
-				# A_constr = zeros(QM.meta.nvar)
-				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-				# 		@views QM.data.Avals[p][first_irow:last_irow]
-				# add_constr!(model, A_constr, '=', QM.meta.lcon[i])
 				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-				 				   QM.data.Avals[p][first_irow:last_irow],
-								   '=', QM.meta.lcon[i])
+				 			QM.data.Avals[p][first_irow:last_irow],
+							'=', QM.meta.lcon[i])
             elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
-				# A_constr = zeros(QM.meta.nvar)
-				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-				# 		@views QM.data.Avals[p][first_irow:last_irow]
-				# add_constr!(model, A_constr, '<', QM.meta.ucon[i])
 				dd_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-								   QM.data.Avals[p][first_irow:last_irow],
-								   '<', QM.meta.lcon[i])
+						   QM.data.Avals[p][first_irow:last_irow],
+						   '<', QM.meta.ucon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf
-				# A_constr = zeros(QM.meta.nvar)
-				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-				# 		@views .-QM.data.Avals[p][first_irow:last_irow]
-			  	# add_constr!(model, A_constr, '<', -QM.meta.lcon[i])
 				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-								   .-QM.data.Avals[p][first_irow:last_irow],
-								   '<', -QM.meta.lcon[i])
+							.-QM.data.Avals[p][first_irow:last_irow],
+							'<', -QM.meta.lcon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
-				# A_constr = zeros(QM.meta.nvar)
-				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-				# 		@views QM.data.Avals[p][first_irow:last_irow]
-				# add_constr!(model, A_constr, '<', QM.meta.ucon[i])
 				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-								   QM.data.Avals[p][first_irow:last_irow],
-								   '<', QM.meta.lcon[i])
-				# A_constr = zeros(QM.meta.nvar)
-				# A_constr[QM.data.Acols[p][first_irow:last_irow]] =
-				# 		@views .-QM.data.Avals[p][first_irow:last_irow]
-			  	# add_constr!(model, A_constr, '<', -QM.meta.lcon[i])
+							QM.data.Avals[p][first_irow:last_irow],
+							'<', QM.meta.ucon[i])
 				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-								   .-QM.data.Avals[p][first_irow:last_irow],
-								   '<', -QM.meta.lcon[i])
+							.-QM.data.Avals[p][first_irow:last_irow],
+							'<', -QM.meta.lcon[i])
             end
         end
     end

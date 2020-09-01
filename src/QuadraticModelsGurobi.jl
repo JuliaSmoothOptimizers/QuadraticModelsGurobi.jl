@@ -83,7 +83,7 @@ function gurobi(QM; method=2, kwargs...)
 				 			QM.data.Avals[p][first_irow:last_irow],
 							'=', QM.meta.lcon[i])
             elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
-				dd_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
 						   QM.data.Avals[p][first_irow:last_irow],
 						   '<', QM.meta.ucon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf

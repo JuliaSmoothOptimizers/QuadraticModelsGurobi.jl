@@ -116,7 +116,6 @@ function gurobi(QM; method=2, kwargs...)
     end
     Aeq = sparse(Aeqrows, Aeqcols, Aeqvals, length(beq), QM.meta.nvar)
     A = sparse(Arows, Acols, Avals, length(b), QM.meta.nvar)
-
 	if !isempty(A) && !isempty(b)
 		add_constrs!(model, A, '<', b)
 	end
@@ -124,14 +123,7 @@ function gurobi(QM; method=2, kwargs...)
 		add_constrs!(model, Aeq, '=', beq)
 	end
 	update_model!(model)
-    # H = sparse(QM.data.Hrows, QM.data.Hcols, QM.data.Hvals, QM.meta.nvar,
-    #            QM.meta.nvar)
-    # H = Matrix(Symmetric(H, :L))
 
-    # model = gurobi_model(env; f = QM.data.c, H = H,
-    #                     A = A, b = b, Aeq = Aeq, beq = beq,
-    #                     lb = QM.meta.lvar, ub = QM.meta.uvar)
-     # run optimization
     optimize(model)
 
     y = zeros(length(beq)+length(b))

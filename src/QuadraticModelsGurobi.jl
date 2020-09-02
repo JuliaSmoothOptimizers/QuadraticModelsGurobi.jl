@@ -109,7 +109,7 @@ function gurobi(QM; method=2, kwargs...)
 	add_constr!(model, QM.meta.Acols[upp], Avals[upp], '<', QM.meta.ucon[upp])
 	rng = [j for j=1:length(Arows) if Arows[j] in QM.meta.jrng]
 	add_constr!(model, QM.meta.Acols[rng], .-Avals[rng], '<', .-QM.meta.lcon[rng])
-	add_constr!(model, QM.meta.Acols[rng], Avals[rng], '<', QM.meta.ucon[rng]))
+	add_constr!(model, QM.meta.Acols[rng], Avals[rng], '<', QM.meta.ucon[rng])
 
 	update_model!(model)
 

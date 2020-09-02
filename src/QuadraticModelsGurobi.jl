@@ -98,7 +98,9 @@ function gurobi(QM; method=2, kwargs...)
     #     end
     # end
 
-	add_rangeconstrs_t!(model, sparse(QM.data.Arows, QM.data.Acols, QM.data.Avals),
+	add_rangeconstrs_t!(model, sparse(QM.data.Arows, QM.data.Acols,
+									  QM.data.Avals, maximum(QM.data.Arows),
+									  QM.meta.nvar),
 						QM.meta.lcon, QM.meta.ucon)
 
 	update_model!(model)

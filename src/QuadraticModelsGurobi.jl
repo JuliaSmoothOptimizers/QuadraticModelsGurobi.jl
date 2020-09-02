@@ -102,19 +102,27 @@ function gurobi(QM; method=2, kwargs...)
     # end
 
 	eq = [j for j=1:length(QM.data.Arows) if QM.data.Arows[j] in QM.meta.jfix]
-	add_constrs!(model, QM.data.Arows[eq], QM.data.Acols[eq], QM.data.Avals[eq],
-				fill('=', length(eq)), QM.meta.lcon[QM.data.Arows[eq]])
+	if eq != []
+		add_constrs!(model, QM.data.Arows[eq], QM.data.Acols[eq], QM.data.Avals[eq],
+					fill('=', length(eq)), QM.meta.lcon[QM.data.Arows[eq]])
+	end
 	low = [j for j=1:length(QM.data.Arows) if QM.data.Arows[j] in QM.meta.jlow]
-	add_constrs!(model, QM.data.Arows[low], QM.data.Acols[low], .-QM.data.Avals[low],
-				fill('<', length(low)), .-QM.meta.lcon[QM.data.Arows[low]])
+	if low != []
+		add_constrs!(model, QM.data.Arows[low], QM.data.Acols[low], .-QM.data.Avals[low],
+					fill('<', length(low)), .-QM.meta.lcon[QM.data.Arows[low]])
+	end
 	upp = [j for j=1:length(QM.data.Arows) if QM.data.Arows[j] in QM.meta.jupp]
-	add_constrs!(model, QM.data.Arows[upp], QM.data.Acols[upp], QM.data.Avals[upp],
-				fill('<', length(upp)), QM.meta.ucon[QM.data.Arows[upp]])
+	if upp != []
+		add_constrs!(model, QM.data.Arows[upp], QM.data.Acols[upp], QM.data.Avals[upp],
+					fill('<', length(upp)), QM.meta.ucon[QM.data.Arows[upp]])
+	end
 	rng = [j for j=1:length(QM.data.Arows) if QM.data.Arows[j] in QM.meta.jrng]
-	add_constrs!(model, QM.data.Arows[rng], QM.data.Acols[rng], .-QM.data.Avals[rng],
-				fill('<', length(rng)), .-QM.meta.lcon[QM.data.Arows[rng]])
-	add_constrs!(model, QM.data.Arows[rng], QM.data.Acols[rng], QM.data.Avals[rng],
-				fill('<', length(rng)), QM.meta.ucon[QM.data.Arows[rng]])
+	if rng != []
+		add_constrs!(model, QM.data.Arows[rng], QM.data.Acols[rng], .-QM.data.Avals[rng],
+					fill('<', length(rng)), .-QM.meta.lcon[QM.data.Arows[rng]])
+		add_constrs!(model, QM.data.Arows[rng], QM.data.Acols[rng], QM.data.Avals[rng],
+					fill('<', length(rng)), QM.meta.ucon[QM.data.Arows[rng]])
+	end
 
 	update_model!(model)
 

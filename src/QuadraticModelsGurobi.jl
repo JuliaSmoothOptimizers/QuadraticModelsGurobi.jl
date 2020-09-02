@@ -6,7 +6,6 @@ using Gurobi
 using QuadraticModels
 using QPSReader
 using SolverTools
-using LinearAlgebra
 using SparseArrays
 
 const gurobi_statuses = Dict(:loaded => :unknown,

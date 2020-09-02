@@ -71,58 +71,35 @@ function gurobi(QM; method=2, kwargs...)
 	end
 
 	# method 1
-    # first_irow = 1
-    # last_irow = 0
-    # p = sortperm(QM.data.Arows)
-    # for i=1:length(QM.meta.lcon)
-    #     if last_irow < length(QM.data.Arows) && @views QM.data.Arows[p][last_irow+1] == i
-    #         first_irow = last_irow + 1
-    #         last_irow = @views first_irow-1+findlast(QM.data.Arows[p][first_irow:end] .== i)
-    #         if QM.meta.lcon[i] == QM.meta.ucon[i]
-	# 			add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-	# 			 			QM.data.Avals[p][first_irow:last_irow],
-	# 						'=', QM.meta.lcon[i])
-    #         elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
-	# 			add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-	# 					   QM.data.Avals[p][first_irow:last_irow],
-	# 					   '<', QM.meta.ucon[i])
-    #         elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf
-	# 			add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-	# 						.-QM.data.Avals[p][first_irow:last_irow],
-	# 						'<', -QM.meta.lcon[i])
-    #         elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
-	# 			add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-	# 						QM.data.Avals[p][first_irow:last_irow],
-	# 						'<', QM.meta.ucon[i])
-	# 			add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-	# 						.-QM.data.Avals[p][first_irow:last_irow],
-	# 						'<', -QM.meta.lcon[i])
-    #         end
-    #     end
-    # end
-
-	eq = [j for j=1:length(QM.data.Arows) if QM.data.Arows[j] in QM.meta.jfix]
-	if eq != []
-		add_constrs!(model, QM.data.Arows[eq], QM.data.Acols[eq], QM.data.Avals[eq],
-					'=', QM.meta.lcon[QM.data.Arows[eq]])
-	end
-	low = [j for j=1:length(QM.data.Arows) if QM.data.Arows[j] in QM.meta.jlow]
-	if low != []
-		add_constrs!(model, QM.data.Arows[low], QM.data.Acols[low], .-QM.data.Avals[low],
-					'<', .-QM.meta.lcon[QM.data.Arows[low]])
-	end
-	upp = [j for j=1:length(QM.data.Arows) if QM.data.Arows[j] in QM.meta.jupp]
-	if upp != []
-		add_constrs!(model, QM.data.Arows[upp], QM.data.Acols[upp], QM.data.Avals[upp],
-					'<', QM.meta.ucon[QM.data.Arows[upp]])
-	end
-	rng = [j for j=1:length(QM.data.Arows) if QM.data.Arows[j] in QM.meta.jrng]
-	if rng != []
-		add_constrs!(model, QM.data.Arows[rng], QM.data.Acols[rng], .-QM.data.Avals[rng],
-					'<', .-QM.meta.lcon[QM.data.Arows[rng]])
-		add_constrs!(model, QM.data.Arows[rng], QM.data.Acols[rng], QM.data.Avals[rng],
-					'<', QM.meta.ucon[QM.data.Arows[rng]])
-	end
+    first_irow = 1
+    last_irow = 0
+    p = sortperm(QM.data.Arows)
+    for i=1:length(QM.meta.lcon)
+        if last_irow < length(QM.data.Arows) && @views QM.data.Arows[p][last_irow+1] == i
+            first_irow = last_irow + 1
+            last_irow = @views first_irow-1+findlast(QM.data.Arows[p][first_irow:end] .== i)
+            if QM.meta.lcon[i] == QM.meta.ucon[i]
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				 			QM.data.Avals[p][first_irow:last_irow],
+							'=', QM.meta.lcon[i])
+            elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+						   QM.data.Avals[p][first_irow:last_irow],
+						   '<', QM.meta.ucon[i])
+            elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+							.-QM.data.Avals[p][first_irow:last_irow],
+							'<', -QM.meta.lcon[i])
+            elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
+				add_rangeconstr!(model, QM.data.Acols[p][first_irow:last_irow],
+							QM.data.Avals[p][first_irow:last_irow],
+							QM.meta.lcon[i], QM.meta.ucon[i])
+				# add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				# 			.-QM.data.Avals[p][first_irow:last_irow],
+				# 			'<', -QM.meta.lcon[i])
+            end
+        end
+    end
 
 	update_model!(model)
 

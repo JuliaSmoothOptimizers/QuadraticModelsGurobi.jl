@@ -79,24 +79,21 @@ function gurobi(QM; method=2, kwargs...)
             first_irow = last_irow + 1
             last_irow = @views first_irow-1+findlast(QM.data.Arows[p][first_irow:end] .== i)
             if QM.meta.lcon[i] == QM.meta.ucon[i]
-				add_constr!(model, view(QM.data.Acols[p],first_irow:last_irow),
-				 			view(QM.data.Avals[p],first_irow:last_irow),
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				 			QM.data.Avals[p][first_irow:last_irow],
 							'=', QM.meta.lcon[i])
             elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
-				add_constr!(model, view(QM.data.Acols[p], first_irow:last_irow),
-						   view(QM.data.Avals[p], first_irow:last_irow),
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+						   QM.data.Avals[p][first_irow:last_irow],
 						   '<', QM.meta.ucon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf
-				add_constr!(model, view(QM.data.Acols[p], first_irow:last_irow),
-							view(.-QM.data.Avals[p], first_irow:last_irow),
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+							.-QM.data.Avals[p][first_irow:last_irow],
 							'<', -QM.meta.lcon[i])
             elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
-				add_rangeconstr!(model, view(QM.data.Acols[p], first_irow:last_irow),
-							view(QM.data.Avals[p], first_irow:last_irow),
+				add_rangeconstr!(model, QM.data.Acols[p][first_irow:last_irow],
+							QM.data.Avals[p][first_irow:last_irow],
 							QM.meta.lcon[i], QM.meta.ucon[i])
-				# add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
-				# 			.-QM.data.Avals[p][first_irow:last_irow],
-				# 			'<', -QM.meta.lcon[i])
             end
         end
     end

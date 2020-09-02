@@ -70,11 +70,38 @@ function gurobi(QM; method=2, kwargs...)
 	  add_qpterms!(model, QM.data.Hrows, QM.data.Hcols, Hvals)
 	end
 
-	add_rangeconstrs!(model, sparse(QM.data.Arows, QM.data.Acols,
-									  QM.data.Avals, maximum(QM.data.Arows),
-									  QM.meta.nvar),
-						QM.meta.lcon, QM.meta.ucon)
-	
+	first_irow = 1
+    last_irow = 0
+    p = sortperm(QM.data.Arows)
+    for i=1:length(QM.meta.lcon)
+        if last_irow < length(QM.data.Arows) && @views QM.data.Arows[p][last_irow+1] == i
+            first_irow = last_irow + 1
+            last_irow = @views first_irow-1+findlast(QM.data.Arows[p][first_irow:end] .== i)
+            if QM.meta.lcon[i] == QM.meta.ucon[i]
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+				 			QM.data.Avals[p][first_irow:last_irow],
+							'=', QM.meta.lcon[i])
+            elseif QM.meta.lcon[i] == -Inf && QM.meta.ucon[i] != Inf
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+						   QM.data.Avals[p][first_irow:last_irow],
+						   '<', QM.meta.ucon[i])
+            elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] == Inf
+				add_constr!(model, QM.data.Acols[p][first_irow:last_irow],
+							.-QM.data.Avals[p][first_irow:last_irow],
+							'<', -QM.meta.lcon[i])
+            elseif QM.meta.lcon[i] != -Inf && QM.meta.ucon[i] != Inf
+				add_rangeconstr!(model, QM.data.Acols[p][first_irow:last_irow],
+							QM.data.Avals[p][first_irow:last_irow],
+							QM.meta.lcon[i], QM.meta.ucon[i])
+            end
+        end
+    end
+
+	# add_rangeconstrs!(model, sparse(QM.data.Arows, QM.data.Acols,
+	# 								  QM.data.Avals, maximum(QM.data.Arows),
+	# 								  QM.meta.nvar),
+	# 					QM.meta.lcon, QM.meta.ucon)
+
 	update_model!(model)
 
     optimize(model)

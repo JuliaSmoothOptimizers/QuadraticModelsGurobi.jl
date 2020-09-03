@@ -3,7 +3,6 @@ module QuadraticModelsGurobi
 export gurobi
 
 using Gurobi
-using QuadraticModels
 using SolverTools
 using SparseArrays
 

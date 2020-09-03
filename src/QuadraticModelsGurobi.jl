@@ -4,33 +4,24 @@ export gurobi
 
 using Gurobi
 using QuadraticModels
-using QPSReader
 using SolverTools
 using SparseArrays
 
 const gurobi_statuses = Dict(:loaded => :unknown,
                              :optimal => :acceptable,
-                            :infeasible => :infeasible,
-                            :inf_or_unbd => :infeasible,
-                            :unbounded => :unbounded,
-                            :cutoff => :exception,
-                            :iteration_limit => :max_iter,
-                            :node_limit => :exception,
-                            :time_limit => :max_time,
-                            :solution_limit => :exception,
-                            :interrupted => :user,
-                            :numeric => :exception,
-                            :suboptimal => :exception,
-                            :inprogress => :exception,
-                            :user_obj_limit => :exception)
-
-
-function createQuadraticModel(qpdata)
-    return QuadraticModel(qpdata.c, qpdata.qrows, qpdata.qcols, qpdata.qvals,
-                        Arows=qpdata.arows, Acols=qpdata.acols, Avals=qpdata.avals,
-                        lcon=qpdata.lcon, ucon=qpdata.ucon, lvar=qpdata.lvar, uvar=qpdata.uvar,
-                        c0=qpdata.c0)
-end
+                             :infeasible => :infeasible,
+                             :inf_or_unbd => :infeasible,
+                             :unbounded => :unbounded,
+                             :cutoff => :exception,
+                             :iteration_limit => :max_iter,
+                             :node_limit => :exception,
+                             :time_limit => :max_time,
+                             :solution_limit => :exception,
+                             :interrupted => :user,
+                             :numeric => :exception,
+                             :suboptimal => :exception,
+                             :inprogress => :exception,
+                             :user_obj_limit => :exception)
 
 
 function gurobi(QM; method=2, kwargs...)
@@ -100,11 +91,6 @@ function gurobi(QM; method=2, kwargs...)
                                                          :reduced_costs => s),
                                   elapsed_time = optim_info.runtime)
     return stats
-end
-
-
-function gurobi(qpdata::QPSData; method=2, kwargs...)
-    return gurobi(createQuadraticModel(qpdata); method=2, kwargs...)
 end
 
 end

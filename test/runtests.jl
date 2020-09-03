@@ -1,4 +1,4 @@
-using QPSReader, QuadraticModelsGurobi
+using QPSReader, QuadraticModels, QuadraticModelsGurobi
 using Test
 
 @testset "QuadraticModelsGurobi.jl" begin

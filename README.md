@@ -6,7 +6,8 @@ format (see QPSReader.jl)
 # Usage
 
 ```julia
-using QPSReader, QuadraticModelsGurobi
+using QPSReader, QuadraticModels, QuadraticModelsGurobi
 qps = readqps("AFIRO.SIF")
-stats = gurobi(qps)
+qm = QuadraticModel(qps)
+stats = gurobi(qm)
 ```

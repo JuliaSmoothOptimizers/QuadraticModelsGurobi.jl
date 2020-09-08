@@ -58,7 +58,7 @@ function sparse_csr(I, J, V, m=maximum(I), n=maximum(J))
 		csrcolval[csrk] = Jk
 		csrnzval[csrk] = V[k]
 	end
-	csrrowptr = unique!(csrrowptr)
+	csrrowptr = csrrowptr[1:end-1]
 	return csrrowptr, csrcolval, csrnzval
 end
 

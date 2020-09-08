@@ -11,7 +11,7 @@ const gurobi_statuses = Dict(:loaded => :unknown,
 							 :infeasible => :infeasible,
 							 :inf_or_unbd => :infeasible,
 							 :unbounded => :unbounded,
-							 :cutoff => :exception,
+		 					 :cutoff => :exception,
 							 :iteration_limit => :max_iter,
 							 :node_limit => :exception,
 							 :time_limit => :max_time,
@@ -107,6 +107,7 @@ function gurobi(QM; method=2, kwargs...)
 	# 					QM.meta.lcon, QM.meta.ucon)
 	add_rangeconstrs!(model, Acsrrowptr, Acsrcolval, Acsrnzval, QM.meta.lcon,
 					  QM.meta.ucon)
+
 
 	update_model!(model)
 

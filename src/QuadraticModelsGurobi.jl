@@ -77,6 +77,8 @@ function gurobi(QM; method=2, kwargs...)
             setparam!(env, "ScaleFlag", v) # 0 = no scaling
         elseif k==:crossover
             setparam!(env, "Crossover", v) # 0 = no crossover
+        elseif k==:display
+            setparam!(env, "OutputFlag", v) # 0 = no display
         end
     end
 

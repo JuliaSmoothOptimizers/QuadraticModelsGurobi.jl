@@ -4,23 +4,23 @@ export gurobi
 
 using Gurobi
 using SolverTools
-using SparseArrays
+using LinearAlgebra, SparseArrays
 
-const gurobi_statuses = Dict(:loaded => :unknown,
-                             :optimal => :acceptable,
-                             :infeasible => :infeasible,
-                             :inf_or_unbd => :infeasible,
-                             :unbounded => :unbounded,
-                             :cutoff => :exception,
-                             :iteration_limit => :max_iter,
-                             :node_limit => :exception,
-                             :time_limit => :max_time,
-                             :solution_limit => :exception,
-                             :interrupted => :user,
-                             :numeric => :exception,
-                             :suboptimal => :exception,
-                             :inprogress => :exception,
-                             :user_obj_limit => :exception)
+const gurobi_statuses = Dict(1 => :unknown,
+                             2 => :acceptable,
+                             3 => :infeasible,
+                             4 => :infeasible,
+                             5 => :unbounded,
+                             6 => :exception,
+                             7 => :max_iter,
+                             8 => :exception,
+                             9 => :max_time,
+                             10 => :exception,
+                             11 => :user,
+                             12 => :exception,
+                             13 => :exception,
+                             14 => :exception,
+                             15 => :exception)
 
 function sparse_csr(I, J, V, m=maximum(I), n=maximum(J))
     csrrowptr = zeros(Int, m+1)
@@ -67,26 +67,24 @@ function gurobi(QM; method=2, kwargs...)
     # -1=automatic, 0=primal simplex, 1=dual simplex, 2=barrier,
     # 3=concurrent, 4=deterministic concurrent, 5=deterministic concurrent simplex.
     # default to barrier
-    setparam!(env, "Method", method)
+    GRBsetintparam(env, "Method", method)
     # use kwargs change to presolve, scaling and crossover mode
     # example: gurobi(QM, presolve=0) (see gurobi doc for other options)
     for (k, v) in kwargs
         if k==:presolve
-            setparam!(env, "Presolve", v) # 0 = no presolve
+            GRBsetintparam(env, "Presolve", v) # 0 = no presolve
         elseif k==:scaling
-            setparam!(env, "ScaleFlag", v) # 0 = no scaling
+            GRBsetintparam(env, "ScaleFlag", v) # 0 = no scaling
         elseif k==:crossover
-            setparam!(env, "Crossover", v) # 0 = no crossover
+            GRBsetintparam(env, "Crossover", v) # 0 = no crossover
         elseif k==:display
-            setparam!(env, "OutputFlag", v) # 0 = no display
+            GRBsetintparam(env, "OutputFlag", v) # 0 = no display
         end
     end
 
-    model = Gurobi.Model(env, "")
-    add_cvars!(model, QM.data.c, QM.meta.lvar, QM.meta.uvar)
-    Gurobi.set_dblattr!(model, "ObjCon", QM.data.c0)
-    update_model!(model)
-
+    model = Ref{Ptr{Cvoid}}()
+    GRBnewmodel(env, model, "", QM.meta.nvar, QM.data.c, QM.meta.lvar, QM.meta.uvar, C_NULL, C_NULL)
+    GRBsetdblattr(model.x, "ObjCon", QM.data.c0)
     if QM.meta.nnzh > 0
         Hvals = zeros(eltype(QM.data.Hvals), length(QM.data.Hvals))
         for i=1:length(QM.data.Hvals)
@@ -96,47 +94,45 @@ function gurobi(QM; method=2, kwargs...)
                 Hvals[i] = QM.data.Hvals[i]
             end
         end
-        add_qpterms!(model, QM.data.Hrows, QM.data.Hcols, Hvals)
+        GRBaddqpterms(model.x, length(QM.data.Hcols), convert(Array{Cint,1}, QM.data.Hrows.-1),
+                      convert(Array{Cint,1}, QM.data.Hcols.-1), Hvals)
     end
 
     Acsrrowptr, Acsrcolval, Acsrnzval = sparse_csr(QM.data.Arows,QM.data.Acols,
                                                    QM.data.Avals, QM.meta.ncon,
                                                    QM.meta.nvar)
+    GRBaddrangeconstrs(model.x, QM.meta.ncon, length(Acsrcolval), convert(Array{Cint,1}, Acsrrowptr.-1),
+                       convert(Array{Cint,1}, Acsrcolval.-1), Acsrnzval, QM.meta.lcon, QM.meta.ucon, C_NULL)
 
-    # add_rangeconstrs!(model, sparse(QM.data.Arows, QM.data.Acols,
-    # 								  QM.data.Avals, QM.meta.ncon,
-    # 								  QM.meta.nvar),
-    # 					QM.meta.lcon, QM.meta.ucon)
-    add_rangeconstrs!(model, Acsrrowptr, Acsrcolval, Acsrnzval, QM.meta.lcon,
-                      QM.meta.ucon)
+    GRBoptimize(model.x)
 
-
-    update_model!(model)
-
-    optimize(model)
-
-    n_constr = Gurobi.get_intattr(model, "NumConstrs")
-    y = zeros(n_constr)
-    for i=1:(n_constr)
-        y[i] = Gurobi.get_dblattrelement(model, "Pi", i)
-    end
-    s = zeros(length(QM.data.c)) # s_l - s_u
-    for i=1:length(QM.data.c)
-        s[i] = Gurobi.get_dblattrelement(model, "RC", i)
-    end
-
-    optim_info = get_optiminfo(model)
-    x = get_solution(model)
-    stats = GenericExecutionStats(get(gurobi_statuses, optim_info.status, :unknown),
+    x = zeros(QM.meta.nvar)
+    GRBgetdblattrarray(model.x, "X", 0, QM.meta.nvar, x)
+    y = zeros(QM.meta.ncon)
+    GRBgetdblattrarray(model.x, "Pi", 0, QM.meta.ncon, y)
+    s = zeros(QM.meta.nvar)
+    GRBgetdblattrarray(model.x, "RC", 0, QM.meta.nvar, s)
+    status = Ref{Cint}()
+    GRBgetintattr(model.x, "Status", status)
+    baritcnt = Ref{Cint}()
+    GRBgetintattr(model.x, "BarIterCount", baritcnt)
+    objval = Ref{Float64}()
+    GRBgetdblattr(model.x, "ObjVal", objval)
+    p_feas = Ref{Float64}()
+    GRBgetdblattr(model.x, "ConstrResidual", p_feas)
+    d_feas = Ref{Float64}()
+    GRBgetdblattr(model.x, "DualResidual", d_feas)
+    elapsed_time = Ref{Float64}()
+    GRBgetdblattr(model.x, "Runtime", elapsed_time)
+    stats = GenericExecutionStats(get(gurobi_statuses, status[], :unknown),
                                   QM, solution = x,
-                                  objective = get_objval(model),
-                                  iter = Gurobi.get_intattr(model,"BarIterCount"),
-                                  primal_feas = Gurobi.get_dblattr(model, "ConstrResidual"),
-                                  dual_feas = Gurobi.get_dblattr(model, "DualResidual"),
-                                  solver_specific = Dict(:multipliers => y,
-                                  :reduced_costs => s),
-                                  elapsed_time = optim_info.runtime)
-                                  return stats
+                                  objective = objval[],
+                                  iter = Int64(baritcnt[]),
+                                  primal_feas = p_feas[],
+                                  dual_feas = d_feas[],
+                                  multipliers = y,
+                                  elapsed_time = elapsed_time[])
+    return stats
 end
 
 end

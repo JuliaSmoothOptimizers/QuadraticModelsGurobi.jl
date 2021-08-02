@@ -3,7 +3,7 @@ module QuadraticModelsGurobi
 export gurobi
 
 using Gurobi
-using SolverTools
+using QuadraticModels, SolverCore
 using LinearAlgebra, SparseArrays
 
 const gurobi_statuses = Dict(1 => :unknown,
@@ -62,7 +62,7 @@ function sparse_csr(I, J, V, m=maximum(I), n=maximum(J))
     return csrrowptr, csrcolval, csrnzval
 end
 
-function gurobi(QM; method=2, kwargs...)
+function gurobi(QM::QuadraticModel; method=2, kwargs...)
     env = Gurobi.Env()
     # -1=automatic, 0=primal simplex, 1=dual simplex, 2=barrier,
     # 3=concurrent, 4=deterministic concurrent, 5=deterministic concurrent simplex.

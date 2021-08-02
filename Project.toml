@@ -1,7 +1,7 @@
 name = "QuadraticModelsGurobi"
 uuid = "b0275aa7-013b-42ad-9e10-dc5d6db0accb"
 authors = ["Geoffroy Leconte <gleconte50@gmail.com> and contributors"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"

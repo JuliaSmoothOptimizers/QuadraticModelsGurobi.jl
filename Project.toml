@@ -11,9 +11,9 @@ SolverCore = "ff4d7338-4cf1-434d-91df-b86cb86fb843"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-Gurobi = "0.9"
-QuadraticModels = "0.5"
-SolverCore = "0.2.1" 
+Gurobi = "0.10"
+QuadraticModels = "0.7"
+SolverCore = "0.2.1, 0.2.2"
 julia = "1"
 
 [extras]

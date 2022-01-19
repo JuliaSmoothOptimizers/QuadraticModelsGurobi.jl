@@ -3,7 +3,7 @@ module QuadraticModelsGurobi
 export gurobi
 
 using Gurobi
-using QuadraticModels, SolverCore
+using QuadraticModels, SolverCore, SparseMatricesCOO
 using LinearAlgebra, SparseArrays
 
 const gurobi_statuses = Dict(1 => :unknown,
@@ -62,7 +62,13 @@ function sparse_csr(I, J, V, m=maximum(I), n=maximum(J))
     return csrrowptr, csrcolval, csrnzval
 end
 
-function gurobi(QM::QuadraticModel; method=2, kwargs...)
+gurobi(QM::QuadraticModel{T, S}; kwargs...) where {T, S} = gurobi(
+    convert(QuadraticModel{T, S, SparseMatrixCOO{T, Int}, SparseMatrixCOO{T, Int}}, QM);
+    kwargs...
+)
+
+function gurobi(QM::QuadraticModel{T, S, M1, M2};
+                method=2, kwargs...) where {T, S, M1 <: SparseMatrixCOO, M2 <: SparseMatrixCOO}
     env = Gurobi.Env()
     # -1=automatic, 0=primal simplex, 1=dual simplex, 2=barrier,
     # 3=concurrent, 4=deterministic concurrent, 5=deterministic concurrent simplex.
@@ -86,20 +92,20 @@ function gurobi(QM::QuadraticModel; method=2, kwargs...)
     GRBnewmodel(env, model, "", QM.meta.nvar, QM.data.c, QM.meta.lvar, QM.meta.uvar, C_NULL, C_NULL)
     GRBsetdblattr(model.x, "ObjCon", QM.data.c0)
     if QM.meta.nnzh > 0
-        Hvals = zeros(eltype(QM.data.Hvals), length(QM.data.Hvals))
-        for i=1:length(QM.data.Hvals)
-            if QM.data.Hrows[i] == QM.data.Hcols[i]
-                Hvals[i] = QM.data.Hvals[i] / 2
+        Hvals = zeros(eltype(QM.data.H.vals), length(QM.data.H.vals))
+        for i=1:length(QM.data.H.vals)
+            if QM.data.H.rows[i] == QM.data.H.cols[i]
+                Hvals[i] = QM.data.H.vals[i] / 2
             else
-                Hvals[i] = QM.data.Hvals[i]
+                Hvals[i] = QM.data.H.vals[i]
             end
         end
-        GRBaddqpterms(model.x, length(QM.data.Hcols), convert(Array{Cint,1}, QM.data.Hrows.-1),
-                      convert(Array{Cint,1}, QM.data.Hcols.-1), Hvals)
+        GRBaddqpterms(model.x, length(QM.data.H.cols), convert(Array{Cint,1}, QM.data.H.rows.-1),
+                      convert(Array{Cint,1}, QM.data.H.cols.-1), Hvals)
     end
 
-    Acsrrowptr, Acsrcolval, Acsrnzval = sparse_csr(QM.data.Arows,QM.data.Acols,
-                                                   QM.data.Avals, QM.meta.ncon,
+    Acsrrowptr, Acsrcolval, Acsrnzval = sparse_csr(QM.data.A.rows,QM.data.A.cols,
+                                                   QM.data.A.vals, QM.meta.ncon,
                                                    QM.meta.nvar)
     GRBaddrangeconstrs(model.x, QM.meta.ncon, length(Acsrcolval), convert(Array{Cint,1}, Acsrrowptr.-1),
                        convert(Array{Cint,1}, Acsrcolval.-1), Acsrnzval, QM.meta.lcon, QM.meta.ucon, C_NULL)

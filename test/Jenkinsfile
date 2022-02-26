@@ -46,7 +46,7 @@ pipeline {
 
      causeString: 'Triggered on comment',
 
-     token: "QuadradicModelsGurobi",
+     token: "QuadraticModelsGurobi",
 
      printContributedVariables: true,
      printPostContent: true,

@@ -4,7 +4,7 @@ using Test
 
 @testset "QuadraticModelsGurobi.jl" begin
     qps1 = readqps("QAFIRO.SIF") #lower bounds
-    stats1 = gurobi(QuadraticModel(qps1))
+    stats1 = gurobi(QuadraticModel(qps1), threads = 1)
     @test isapprox(stats1.objective, -1.59078179, atol=1e-2)
     @test stats1.status == :acceptable
 

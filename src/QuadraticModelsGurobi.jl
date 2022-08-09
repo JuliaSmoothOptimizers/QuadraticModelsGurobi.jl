@@ -85,6 +85,8 @@ function gurobi(QM::QuadraticModel{T, S, M1, M2};
             GRBsetintparam(env, "Crossover", v) # 0 = no crossover
         elseif k==:display
             GRBsetintparam(env, "OutputFlag", v) # 0 = no display
+        elseif k==:threads
+            GRBsetintparam(env, "Threads", v) 
         end
     end
 

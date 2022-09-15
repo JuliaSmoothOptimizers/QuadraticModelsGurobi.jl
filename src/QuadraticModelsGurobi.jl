@@ -132,8 +132,9 @@ function gurobi(QM::QuadraticModel{T, S, M1, M2};
     GRBgetdblattr(model.x, "DualResidual", d_feas)
     elapsed_time = Ref{Float64}()
     GRBgetdblattr(model.x, "Runtime", elapsed_time)
-    stats = GenericExecutionStats(get(gurobi_statuses, status[], :unknown),
-                                  QM, solution = x,
+    stats = GenericExecutionStats(QM,
+                                  status = get(gurobi_statuses, status[], :unknown),
+                                  solution = x,
                                   objective = objval[],
                                   iter = Int64(baritcnt[]),
                                   primal_feas = p_feas[],

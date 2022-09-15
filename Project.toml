@@ -13,9 +13,9 @@ SparseMatricesCOO = "fa32481b-f100-4b48-8dc8-c62f61b13870"
 
 [compat]
 Gurobi = "0.10, 0.11"
-QuadraticModels = "0.7, 0.8, 0.9"
-SolverCore = "0.2.1, 0.2.2"
-SparseMatricesCOO = "0.1, 0.2"
+QuadraticModels = "0.9"
+SolverCore = "0.3"
+SparseMatricesCOO = "0.2"
 julia = "1"
 
 [extras]

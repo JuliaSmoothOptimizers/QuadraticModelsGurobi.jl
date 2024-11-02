@@ -1,0 +1,8 @@
+PackageName: "QuadraticModelsGurobi"
+PackageOwner: "JuliaSmoothOptimizers"
+PackageUUID: "b0275aa7-013b-42ad-9e10-dc5d6db0accb"
+_src_path: "https://github.com/JuliaSmoothOptimizers/JSOBestieTemplate.jl"
+_commit: "v0.13.0"
+AddBreakage: true
+AddBenchmark: false
+AddBenchmarkCI: true

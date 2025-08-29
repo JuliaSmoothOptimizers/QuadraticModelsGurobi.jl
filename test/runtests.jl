@@ -43,7 +43,9 @@ using Test
         c0 = 0.0,
         name = "QM_dense",
     )
-    stats_dense = gurobi(qp_dense)
-    @test isapprox(stats_dense.objective, 1.1249999990782493, atol = 1e-2)
-    @test stats_dense.status == :acceptable
+    for method in [1,2]
+        stats_dense = gurobi(qp_dense, Method = method)
+        @test isapprox(stats_dense.objective, 1.1249999990782493, atol = 1e-2)
+        @test stats_dense.status == :acceptable
+    end
 end

@@ -67,28 +67,9 @@ gurobi(QM::QuadraticModel{T, S}; kwargs...) where {T, S} = gurobi(
     kwargs...
 )
 
-function gurobi(QM::QuadraticModel{T, S, M1, M2};
-                method=2, kwargs...) where {T, S, M1 <: SparseMatrixCOO, M2 <: SparseMatrixCOO}
-    env = Gurobi.Env()
-    # -1=automatic, 0=primal simplex, 1=dual simplex, 2=barrier,
-    # 3=concurrent, 4=deterministic concurrent, 5=deterministic concurrent simplex.
-    # default to barrier
-    GRBsetintparam(env, "Method", method)
-    # use kwargs change to presolve, scaling and crossover mode
-    # example: gurobi(QM, presolve=0) (see gurobi doc for other options)
-    for (k, v) in kwargs
-        if k==:presolve
-            GRBsetintparam(env, "Presolve", v) # 0 = no presolve
-        elseif k==:scaling
-            GRBsetintparam(env, "ScaleFlag", v) # 0 = no scaling
-        elseif k==:crossover
-            GRBsetintparam(env, "Crossover", v) # 0 = no crossover
-        elseif k==:display
-            GRBsetintparam(env, "OutputFlag", v) # 0 = no display
-        elseif k==:threads
-            GRBsetintparam(env, "Threads", v) 
-        end
-    end
+function gurobi(QM::QuadraticModel{T, S, M1, M2}; kwargs...) where {T, S, M1 <: SparseMatrixCOO, M2 <: SparseMatrixCOO}
+    
+    env = Gurobi.Env(Dict{String,Any}(string(k) => v for (k,v) in kwargs))
 
     model = Ref{Ptr{Cvoid}}()
     GRBnewmodel(env, model, "", QM.meta.nvar, QM.data.c, QM.meta.lvar, QM.meta.uvar, C_NULL, C_NULL)
